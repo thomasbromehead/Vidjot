@@ -30,6 +30,11 @@ mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/vidjot') //Could have been a remote db such as mitLab
 .then( () =>  console.log('Mongodb connected...'))
 .catch(err => console.log(err));
+
+//Load Idea Model
+require('./models/Ideas'); //Bring model in
+const Idea = mongoose.model('ideas');
+
 //About route
 app.get('/about', (req, res) => {
    const title = "About handlebars";
@@ -37,6 +42,12 @@ app.get('/about', (req, res) => {
       title: title
    });
 });
+
+//Add Idea Form
+app.get('/ideas/add', (req, res) => {
+   res.render('ideas/add');
+});
+
 
 const port= 5000;
 
