@@ -47,6 +47,18 @@ app.get('/about', (req, res) => {
    });
 });
 
+//Idea Index Page
+app.get('/ideas', (req, res) => {
+      Idea.find({})
+      .sort({date:1})
+      .then(ideas => {
+         console.log(ideas);
+         res.render('ideas/index', {
+            ideas:ideas
+         })
+      });
+});
+
 //Add Idea Form
 app.get('/ideas/add', (req, res) => {
    res.render('ideas/add');
@@ -54,28 +66,38 @@ app.get('/ideas/add', (req, res) => {
 
 //Process Form with a Post request
 app.post('/ideas', (req, res) => {
+
+// Server Side Validation
   let errors = [];
   let counter = 0;
 
-  if(!req.body.title){
+   if(!req.body.title){
      errors.push({text:'Please add a title!'});
      counter ++
   } 
   if(!req.body.details){
      errors.push({text: 'Please add some details'});
      counter ++
-  }
+  } 
   if(errors.length > 0) {
      res.render('ideas/add',{
         errors: errors,
         title: req.body.title,
         details: req.body.details
      });
+   //Default Success Case
   } else {
-     res.send('passed');
+      const newUser = {
+         title: req.body.title,
+         details: req.body.details,
+      }
+      new Idea(newUser) //from line 40, mongoose.model('ideas')
+      .save()
+      .then(ideas => {
+         res.redirect('/ideas');
+      })
   }
-  console.log(errors);
-  console.log(counter);
+
 });
 
 
