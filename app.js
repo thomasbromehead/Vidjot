@@ -1,5 +1,7 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
+const mongoose = require('mongoose'); //Require the modules everytime.
+
 const app = express();
 
 
@@ -17,12 +19,17 @@ const app = express();
 
 //Index Route
 app.get('/', (req, res) => {
-   const title = "Dynamic Titles";
+   const title = "Welcome to Vidjot";
    res.render('index', {
       title: title
    });
 });
 
+// Connect to mongoose
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/vidjot') //Could have been a remote db such as mitLab
+.then( () =>  console.log('Mongodb connected...'))
+.catch(err => console.log(err));
 //About route
 app.get('/about', (req, res) => {
    const title = "About handlebars";
