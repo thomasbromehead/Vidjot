@@ -2,6 +2,7 @@ const express = require('express');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose'); //Require the modules everytime.
 const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
 
 const app = express();
 
@@ -20,6 +21,9 @@ const app = express();
    //Body Parser Middleware
    app.use(bodyParser.urlencoded({ extended: false }))
    app.use(bodyParser.json())
+
+   //Method Override Middleware to handle PUT request to update video idea
+   app.use(methodOverride('_method'));
 
 //Index Route
 app.get('/', (req, res) => {
@@ -49,10 +53,10 @@ app.get('/about', (req, res) => {
 
 //Idea Index Page
 app.get('/ideas', (req, res) => {
-      Idea.find({})
-      .sort({date:1})
+      Idea.find({}) //to find all objects in the mongoose collection
+      .sort({date:1}) //sort ascending
       .then(ideas => {
-         console.log(ideas);
+        // console.log(ideas);
          res.render('ideas/index', {
             ideas:ideas
          })
@@ -64,10 +68,39 @@ app.get('/ideas/add', (req, res) => {
    res.render('ideas/add');
 });
 
+//Edit Idea Form
+app.get('/ideas/edit/:id', (req, res) => { //Pass in the id of the mongoose idea
+   Idea.findOne({
+      _id: req.params.id
+   })
+   .then(idea => {
+      res.render('ideas/edit',
+      {
+         idea:idea
+      });
+   });
+});
+
+//Edit Form process -- catching a put request
+app.put('/ideas/:id', (req, res) => {
+   Idea.findOne({
+      _id: req.params.id
+   })
+   .then( idea => {
+      //new values
+      idea.title = req.body.title;
+      idea.details = req.body.details;
+      idea.save()
+      .then(idea => {
+         res.redirect('/ideas');
+      });
+   });
+});
+
 //Process Form with a Post request
 app.post('/ideas', (req, res) => {
 
-// Server Side Validation
+ // Server Side Validation
   let errors = [];
   let counter = 0;
 
@@ -99,6 +132,17 @@ app.post('/ideas', (req, res) => {
   }
 
 });
+
+//Delete Idea -- catching a delete request, URLs can be same as edit form, so long as the method is different ie here app.delete
+app.delete('/ideas/:id', (req, res) => {
+   Idea.remove({
+      _id : req.params.id
+   })
+   .then(() => {
+      res.redirect('/ideas');
+   })
+});
+
 
 
 const port= 5000;
