@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
+const {ensureAuthenticated} = require ('../helpers/auth');
+//destructuring allows us to pull out the function with {}
 
 
 //Load Idea Model
@@ -20,12 +22,12 @@ router.get('/', (req, res) => {
 });
 
 //Add Idea Form
-router.get('/add', (req, res) => {
+router.get('/add', ensureAuthenticated, (req, res) => {
 res.render('ideas/add');
 });
 
 //Edit Idea Form
-router.get('/edit/:id', (req, res) => { //Pass in the id of the mongoose idea
+router.get('/edit/:id', ensureAuthenticated, (req, res) => { //Pass in the id of the mongoose idea
 Idea.findOne({
    _id: req.params.id
 })
@@ -38,7 +40,7 @@ Idea.findOne({
 });
 
 //Edit Form process -- catching a put request
-router.put('/:id', (req, res) => {
+router.put('/:id', ensureAuthenticated, (req, res) => {
 Idea.findOne({
    _id: req.params.id
 })
@@ -55,7 +57,7 @@ Idea.findOne({
 });
 
 //Process Form with a Post request
-router.post('/', (req, res) => {
+router.post('/', ensureAuthenticated, (req, res) => {
 
 // Server Side Validation
 let errors = [];
@@ -92,7 +94,7 @@ if(errors.length > 0) {
 });
 
 //Delete Idea -- catching a delete request, URLs can be same as edit form, so long as the method is different ie here app.delete
-router.delete('/:id', (req, res) => {
+router.delete('/:id', ensureAuthenticated, (req, res) => {
 Idea.remove({
    _id : req.params.id
 })
