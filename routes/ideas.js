@@ -11,7 +11,7 @@ const Idea = mongoose.model('ideas');
 
 //Idea Index Page
 router.get('/', (req, res) => {
-   Idea.find({}) //to find all objects in the mongoose collection
+   Idea.find({user: req.user.id}) //to find all objects in the mongoose collection leave empty, otherwise filter so only idea owner sees his/her ideas
    .sort({date:1}) //sort ascending
    .then(ideas => {
      // console.log(ideas);
@@ -29,13 +29,18 @@ res.render('ideas/add');
 //Edit Idea Form
 router.get('/edit/:id', ensureAuthenticated, (req, res) => { //Pass in the id of the mongoose idea
 Idea.findOne({
-   _id: req.params.id
+   _id: req.params.id //_id is the key name in mongoose
 })
 .then(idea => {
-   res.render('ideas/edit',
-   {
-      idea:idea
-   });
+  if(idea.user != req.user.id) {
+    req.flash('error_msg', 'Not Authorized');
+    res.redirect('/ideas');
+  } else {
+    res.render('ideas/edit',
+    {
+       idea:idea
+    });
+  }
 });
 });
 
@@ -82,6 +87,7 @@ if(errors.length > 0) {
    const newUser = {
       title: req.body.title,
       details: req.body.details,
+      user: req.user.id
    }
    new Idea(newUser) //from line 40, mongoose.model('ideas')
    .save()

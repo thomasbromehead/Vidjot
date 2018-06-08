@@ -8,6 +8,8 @@ const passport = require('passport');
 require('../models/User');
 const User = mongoose.model('users');
 
+const {ensureAuthenticated} = require ('../helpers/auth');
+
 
 //replace app.get/delete etc with router.get
 
@@ -94,7 +96,7 @@ router.post('/register', (req, res) => {
 }); 
 
 //Log out User
-router.get('/logout', (req, res) =>{
+router.get('/logout', ensureAuthenticated, (req, res) =>{
    req.logout();
    req.flash('success_msg', 'Successfully logged out');
    res.redirect('/users/login');
